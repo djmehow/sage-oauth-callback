@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
 <title>Tatus · Sage OAuth callback</title>
 <style>
   :root{
@@ -34,76 +36,49 @@
   .steps{margin-top:22px;padding-top:18px;border-top:1px solid var(--line);font-size:14px}
   .steps code{font-family:var(--mono);background:#0d0f14;border:1px solid var(--line);
     padding:2px 6px;border-radius:6px}
+  .code button{flex:none}
   .foot{margin-top:22px;font-size:12px;color:var(--muted)}
 </style>
 </head>
-<body>
+<body data-provider="Sage">
   <div class="card">
     <div class="brand"><span class="dot"></span> Tatus Consultancy · Sage integration</div>
-    <h1 id="headline">Waiting for authorization…</h1>
-    <p id="subhead">This page receives the sign-in result from Sage. Nothing is sent anywhere — the code below is read locally by your reporting tool.</p>
+    <h1 id="headline">Waiting for authorisation…</h1>
+    <p id="subhead">This page receives the sign-in result from Sage. Nothing is sent anywhere — the values below are read locally by your reporting tool.</p>
 
     <div id="result" style="display:none">
       <div class="field">
-        <div class="label">Authorization code</div>
+        <div class="label">Full redirect URL</div>
+        <div class="code">
+          <input id="fullurl" readonly value="">
+          <button data-copy="fullurl">Copy</button>
+        </div>
+      </div>
+      <div class="field">
+        <div class="label">Authorisation code</div>
         <div class="code">
           <input id="code" readonly value="">
-          <button id="copyCode">Copy</button>
+          <button data-copy="code">Copy</button>
         </div>
       </div>
       <div class="field">
         <div class="label">State</div>
-        <div class="code"><input id="state" readonly value=""></div>
+        <div class="code">
+          <input id="state" readonly value="">
+          <button data-copy="state">Copy</button>
+        </div>
       </div>
     </div>
 
     <div class="steps">
       <div class="status" id="status">—</div>
       <p style="margin-top:10px">Back in your terminal, at the <code>python auth.py login</code> prompt, paste the
-      <strong>full address-bar URL</strong> of this page (or just the code above).</p>
+      <strong>full redirect URL</strong> above. The code expires within minutes.</p>
     </div>
 
     <div class="foot">Static page · no server · no cookies · holds no secrets. Public repo by design.</div>
   </div>
 
-<script>
-(function(){
-  var q = new URLSearchParams(window.location.search);
-  var code = q.get("code");
-  var state = q.get("state");
-  var err = q.get("error");
-  var errDesc = q.get("error_description");
-  var status = document.getElementById("status");
-  var headline = document.getElementById("headline");
-  var subhead = document.getElementById("subhead");
-
-  if (err){
-    headline.textContent = "Authorization failed";
-    subhead.textContent = "Sage returned an error. Start the login again from your terminal.";
-    status.className = "status err";
-    status.textContent = "✗ " + err + (errDesc ? " — " + errDesc : "");
-    return;
-  }
-  if (code){
-    document.getElementById("result").style.display = "block";
-    document.getElementById("code").value = code;
-    document.getElementById("state").value = state || "(none)";
-    headline.textContent = "You're signed in to Sage";
-    subhead.textContent = "Copy the authorization code below (or the whole URL) back into your terminal to finish.";
-    status.className = "status ok";
-    status.textContent = "✓ Authorization code received";
-    document.getElementById("copyCode").addEventListener("click", function(){
-      var el = document.getElementById("code"); el.select();
-      navigator.clipboard.writeText(el.value).then(function(){
-        this.textContent = "Copied"; setTimeout(function(){ this.textContent="Copy"; }.bind(this),1500);
-      }.bind(this));
-    });
-    return;
-  }
-  // No params: someone visited the page directly.
-  status.className = "status";
-  status.textContent = "No authorization code in the URL yet.";
-})();
-</script>
+<script src="app.js"></script>
 </body>
 </html>
